@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\shemy\Documents\Курсовая2\global-optimization-algorithms\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\shemy\Documents\Курсовая2\global-optimization-algorithms\Solve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\shemy\Documents\Курсовая2\global-optimization-algorithms\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{524F4D35-198A-3088-9D9B-1ED143FB4B47}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

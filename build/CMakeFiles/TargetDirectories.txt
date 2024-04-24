@@ -1,0 +1,3 @@
+C:/Users/shemy/Documents/Курсовая2/global-optimization-algorithms/build/CMakeFiles/global_optimization_algorithms.dir
+C:/Users/shemy/Documents/Курсовая2/global-optimization-algorithms/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/shemy/Documents/Курсовая2/global-optimization-algorithms/build/CMakeFiles/ZERO_CHECK.dir
