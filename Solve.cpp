@@ -2,13 +2,14 @@
 #include "Solve.h"
 #include <math.h>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
 void Solver::Solve(int i) {
-	int K = 2; //ËÁÌ‡˜‡Î¸ÌÓ 2 ÚÓ˜ÍË
+	int K = 2; //–∏–∑–Ω–∞—á–∞–ª—å–Ω–æ 2 —Ç–æ—á–∫–∏
 	bool flag = 1;
-	vector<Trial> trials(Kmax);
+	trials.resize(Kmax);
 	double minFunc = trials[0].z, argmin = trials[0].x, l = trials[0].k;
 	FirstTrial(i, &minFunc, &argmin, &l, trials);
 
@@ -24,43 +25,91 @@ void Solver::Solve(int i) {
 		//MakeNewTrial_SS(i, &K, trials, &t);
 
 		UpdateOptimum(&minFunc, &argmin, &l, trials);
-		CheckStopCondition(&flag, trials, &t);
+		//CheckStopCondition(&flag, trials, &t);
+		//CheckStopConditionWithKnownOptPoint(i, &flag, trials, &t);
+		CheckStopConditionCurrentZ(&flag, trials, &t);
 	}
 	MakeBestTrial(&minFunc, &argmin, &l);
 	GetSolution();
 
-	/*cout << "«Ì‡˜ÂÌËˇ ·‡ÁÓ‚Ó„Ó ‡Î„ÓËÚÏ‡:" << endl;
+	/*cout << "–ó–Ω–∞—á–µ–Ω–∏—è –±–∞–∑–æ–≤–æ–≥–æ –∞–ª–≥–æ—Ä–∏—Ç–º–∞:" << endl;
 	BaseAlgorithm();
-	cout << "\n«Ì‡˜ÂÌËˇ ‡Î„ÓËÚÏ‡ ÔÂÂ·Ó‡:" << endl;
+	cout << "\n–ó–Ω–∞—á–µ–Ω–∏—è –∞–ª–≥–æ—Ä–∏—Ç–º–∞ –ø–µ—Ä–µ–±–æ—Ä–∞:" << endl;
 	SequentialScan();*/
 }
+void SolverNew::Solve(int i) {
+	int K = 2; //–∏–∑–Ω–∞—á–∞–ª—å–Ω–æ 2 —Ç–æ—á–∫–∏
+	bool flag = 1;
+	trials.resize(Kmax);
+	double minFunc = trials[0].z, argmin = trials[0].x, l = trials[0].k;
+	FirstTrial(i, &minFunc, &argmin, &l, trials);
 
-/*void Solver::SetParams() {//Ì‡·Ó Ò ÍÓÌÒÓÎË
-	cout << "¬‚Â‰ËÚÂ ËÌÚÂ‚‡Î, Ì‡ ÍÓÚÓÓÏ ·Û‰ÂÚ ‡ÒÒÏ‡ÚË‚‡Ú¸Òˇ ÙÛÌÍˆËˇ: ";
+	while (flag && (K < Kmax)) {
+		int t;
+
+		FindMaxR(&K, trials, &t);
+		MakeNewTrial(i, &K, trials, &t);
+
+		UpdateOptimum(&minFunc, &argmin, &l, trials);
+		//CheckStopCondition(&flag, trials, &t);
+		//CheckStopConditionWithKnownOptPoint(i, &flag, trials, &t);
+		CheckStopConditionCurrentZ(&flag, trials, &t);
+	}
+	MakeBestTrial(&minFunc, &argmin, &l);
+	GetSolution();
+}
+void SolverRoot::Solve(int i) {
+	int K = 2; //–∏–∑–Ω–∞—á–∞–ª—å–Ω–æ 2 —Ç–æ—á–∫–∏
+	bool flag = 1;
+	trials.resize(Kmax);
+	double minFunc = trials[0].z, argmin = trials[0].x, l = trials[0].k;
+	FirstTrial(i, &minFunc, &argmin, &l, trials);
+
+	while (flag && (K < Kmax)) {
+		int t;
+
+		FindMaxR(&K, trials, &t);
+		MakeNewTrial(i, &K, trials, &t);
+
+		UpdateOptimum(&minFunc, &argmin, &l, trials);
+		CheckStopConditionCurrentZ(&flag, trials, &t);
+		//CheckStopConditionWithKnownOptPoint(i, &flag, trials, &t);
+	}
+	MakeBestTrial(&minFunc, &argmin, &l);
+	GetSolution();
+}
+
+/*void Solver::SetParams() {//–Ω–∞–±–æ—Ä —Å –∫–æ–Ω—Å–æ–ª–∏
+	cout << "–í–≤–µ–¥–∏—Ç–µ –∏–Ω—Ç–µ—Ä–≤–∞–ª, –Ω–∞ –∫–æ—Ç–æ—Ä–æ–º –±—É–¥–µ—Ç —Ä–∞—Å—Å–º–∞—Ç—Ä–∏–≤–∞—Ç—å—Å—è —Ñ—É–Ω–∫—Ü–∏—è: ";
 	cin >> a >> b;
-	cout << "\n¬‚Â‰ËÚÂ Ô‡‡ÏÂÚ ÏÂÚÓ‰‡ 2<=r<=4: ";
+	cout << "\n–í–≤–µ–¥–∏—Ç–µ –ø–∞—Ä–∞–º–µ—Ç—Ä –º–µ—Ç–æ–¥–∞ 2<=r<=4: ";
 	cin >> r;
-	cout << "\n¬‚Â‰ËÚÂ ÚÓ˜ÌÓÒÚ¸: ";
+	cout << "\n–í–≤–µ–¥–∏—Ç–µ —Ç–æ—á–Ω–æ—Å—Ç—å: ";
 	cin >> eps;
-	cout << "\n¬‚Â‰ËÚÂ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ÍÓÎË˜ÂÒÚ‚Ó ËÚÂ‡ˆËÈ: ";
+	cout << "\n–í–≤–µ–¥–∏—Ç–µ –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∫–æ–ª–∏—á–µ—Å—Ç–≤–æ –∏—Ç–µ—Ä–∞—Ü–∏–π: ";
 	cin >> Kmax;
 }*/
 
 Trial Solver:: GetSolution() {
-	cout << "\n“ÂÍÛ˘ËÈ ÂÁÛÎ¸Ú‡Ú" << endl;
+	cout << "\n–¢–µ–∫—É—â–∏–π —Ä–µ–∑—É–ª—å—Ç–∞—Ç" << endl;
 	cout << "z = " << NewTrial.z << endl;
 	cout << "x = " << NewTrial.x << endl;
 	cout << "k = " << NewTrial.k << endl;
 
-	cout << "ÀÛ˜¯ËÈ ÂÁÛÎ¸Ú‡Ú" << endl;
+	cout << "–õ—É—á—à–∏–π —Ä–µ–∑—É–ª—å—Ç–∞—Ç" << endl;
 	cout << "z = " << BestTrial.z << endl;
 	cout << "x = " << BestTrial.x << endl;
 	cout << "k = " << BestTrial.k;
 	return BestTrial;
 }
+int Solver::GetK() {
+	Solver::h;
+	h = BestTrial.k;
+	return h;
+}
 
 /*void Solver::BaseAlgorithm() {
-	int K = 2; //ËÁÌ‡˜‡Î¸ÌÓ 2 ÚÓ˜ÍË
+	int K = 2; //–∏–∑–Ω–∞—á–∞–ª—å–Ω–æ 2 —Ç–æ—á–∫–∏
 	bool flag = 1;
 	vector<Trial> trials(Kmax);
 	trials[0].x = a; trials[0].z = obj_func(trials[0].x); trials[0].k = 1;
@@ -76,7 +125,7 @@ Trial Solver:: GetSolution() {
 	while (flag && (K < Kmax)) {
 
 		double M = 0, res, m;
-		for (int i = 1; i < K; i++) {//ÓˆÂÌËÏ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ‡·ÒÓÎ˛ÚÌÓÂ ÁÌ‡˜ÂÌËÂ ÓÚÌÓÒËÚÂÎ¸ÌÓÈ ÔÂ‚ÓÈ ‡ÁÌÓÒÚË
+		for (int i = 1; i < K; i++) {//–æ—Ü–µ–Ω–∏–º –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∞–±—Å–æ–ª—é—Ç–Ω–æ–µ –∑–Ω–∞—á–µ–Ω–∏–µ –æ—Ç–Ω–æ—Å–∏—Ç–µ–ª—å–Ω–æ–π –ø–µ—Ä–≤–æ–π —Ä–∞–∑–Ω–æ—Å—Ç–∏
 			res = fabs((trials[i].z - trials[i - 1].z) / (trials[i].x - trials[i - 1].x));
 			if (res > M) //res = max(M,fabs((trials[i].z - trials[i - 1].z) / (trials[i].x - trials[i - 1].x)))
 				M = res;
@@ -105,7 +154,7 @@ Trial Solver:: GetSolution() {
 			l = NewTrial.k;
 		}
 
-		if (trials[t].x - trials[t - 1].x <= eps * (b - a))//ÛÒÎÓ‚ËÂ ÓÒÚ‡ÌÓ‚ÍË
+		if (trials[t].x - trials[t - 1].x <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
 			flag = 0;
 
 		trials.insert(trials.begin() + t, NewTrial);
@@ -118,7 +167,7 @@ Trial Solver:: GetSolution() {
 }
 
 void Solver::SequentialScan() {
-	int K = 2; //ËÁÌ‡˜‡Î¸ÌÓ 2 ÚÓ˜ÍË
+	int K = 2; //–∏–∑–Ω–∞—á–∞–ª—å–Ω–æ 2 —Ç–æ—á–∫–∏
 	bool flag = 1;
 
 	vector<Trial> trials(Kmax);
@@ -154,7 +203,7 @@ void Solver::SequentialScan() {
 			l = NewTrial.k;
 		}
 
-		if (trials[t].x - trials[t - 1].x <= eps * (b - a))//ÛÒÎÓ‚ËÂ ÓÒÚ‡ÌÓ‚ÍË
+		if (trials[t].x - trials[t - 1].x <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
 			flag = 0;
 
 		trials.insert(trials.begin() + t, NewTrial);
@@ -168,6 +217,7 @@ void Solver::SequentialScan() {
 void Solver::FirstTrial(int i, double* minFunc, double* argmin, double* l, vector<Trial>& trials) {
 	trials[0].x = a; trials[0].z = obj_func(trials[0].x,i); trials[0].k = 1;
 	trials[1].x = b; trials[1].z = obj_func(trials[1].x,i); trials[1].k = 2;
+	*minFunc = trials[0].z, * argmin = trials[0].x, * l = trials[0].k;
 
 	if (*minFunc > trials[1].z) {
 		*minFunc = trials[1].z;
@@ -177,7 +227,7 @@ void Solver::FirstTrial(int i, double* minFunc, double* argmin, double* l, vecto
 }
 void Solver::EstimateConstant(int *K, vector<Trial>& trials, double *m) {
 	double M = 0, res;
-	for (int i = 1; i < *K; i++) {//ÓˆÂÌËÏ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ‡·ÒÓÎ˛ÚÌÓÂ ÁÌ‡˜ÂÌËÂ ÓÚÌÓÒËÚÂÎ¸ÌÓÈ ÔÂ‚ÓÈ ‡ÁÌÓÒÚË
+	for (int i = 1; i < *K; i++) {//–æ—Ü–µ–Ω–∏–º –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∞–±—Å–æ–ª—é—Ç–Ω–æ–µ –∑–Ω–∞—á–µ–Ω–∏–µ –æ—Ç–Ω–æ—Å–∏—Ç–µ–ª—å–Ω–æ–π –ø–µ—Ä–≤–æ–π —Ä–∞–∑–Ω–æ—Å—Ç–∏
 		res = fabs((trials[i].z - trials[i - 1].z) / (trials[i].x - trials[i - 1].x));
 		if (res > M) //res = max(M,fabs((trials[i].z - trials[i - 1].z) / (trials[i].x - trials[i - 1].x)))
 			M = res;
@@ -207,7 +257,32 @@ void Solver::FindMaxR_SS(int* K, vector<Trial>& trials, int* t) { //Sequential S
 		}
 	}
 }
-void Solver::MakeNewTrial_BA(int i, int* K, vector<Trial>& trials, int* t, double* m) {
+void SolverNew::FindMaxR(int* K, vector<Trial>& trials, int* t) { ////////// new
+	double min = 10000;
+	vector <double> R(*K);
+	for (int i = 1; i < *K; i++) {
+		R[i] = (trials[i].z + trials[i - 1].z)/(trials[i].x - trials[i - 1].x);
+		if (R[i] < min) {
+			min = R[i];
+			*t = i;
+		}
+	}
+}
+void SolverRoot::FindMaxR(int* K, vector<Trial>& trials, int* t) { ////////// root
+	double min = 10000;
+	vector <double> R(*K);
+	for (int i = 1; i < *K; i++) {
+		if (trials[i].z * trials[i - 1].z >= 0) {
+			R[i] = (trials[i].z * trials[i - 1].z) / (trials[i].x - trials[i - 1].x);
+		}
+		else R[i] = 0;
+		if (R[i] < min) {
+			min = R[i];
+			*t = i;
+		}
+	}
+}
+void Solver::MakeNewTrial_BA(int i, int* K, vector<Trial>& trials, int* t, double* m) {//–¥–æ–±–∞–≤–ª–µ–Ω–æ i –¥–ª—è —Å–µ–º–µ–π—Å—Ç–≤–∞
 	NewTrial.x = (trials[*t].x + trials[*t - 1].x) / 2 - ((trials[*t].z - trials[*t - 1].z) / (2 * *m));
 	NewTrial.z = obj_func(NewTrial.x,i);
 	NewTrial.k = *K + 1;
@@ -219,6 +294,18 @@ void Solver::MakeNewTrial_SS(int i, int* K, vector<Trial>& trials, int* t) {
 	NewTrial.k = *K + 1;
 	*K = *K + 1;
 }
+void SolverNew::MakeNewTrial(int i, int* K, vector<Trial>& trials, int* t) { ////////// new
+	NewTrial.x = (trials[*t].x + trials[*t - 1].x) / 2 - ((trials[*t].z - trials[*t - 1].z) / (trials[*t].z + trials[*t - 1].z)) * (trials[*t].x - trials[*t - 1].x) * 1 / (2 * r);
+	NewTrial.z = obj_func(NewTrial.x, i);
+	NewTrial.k = *K + 1;
+	*K = *K + 1;
+}
+void SolverRoot::MakeNewTrial(int i, int* K, vector<Trial>& trials, int* t) { ////////// root
+	NewTrial.x = ((abs(trials[*t].z) * trials[*t - 1].x) + (abs(trials[*t - 1].z) * trials[*t].x)) / (abs(trials[*t].z) + abs(trials[*t - 1].z));
+	NewTrial.z = obj_func(NewTrial.x, i);
+	NewTrial.k = *K + 1;
+	*K = *K + 1;
+}
 void Solver::UpdateOptimum(double* minFunc, double* argmin, double* l, vector<Trial>& trials) {
 	if (*minFunc > NewTrial.z) {
 		*minFunc = NewTrial.z;
@@ -227,7 +314,19 @@ void Solver::UpdateOptimum(double* minFunc, double* argmin, double* l, vector<Tr
 	}
 }
 void Solver::CheckStopCondition(bool *flag, vector<Trial>& trials, int* t) {
-	if (trials[*t].x - trials[*t - 1].x <= eps * (b - a))//ÛÒÎÓ‚ËÂ ÓÒÚ‡ÌÓ‚ÍË
+	if (trials[*t].x - trials[*t - 1].x <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
+		*flag = 0;
+	trials.insert(trials.begin() + *t, NewTrial);
+}
+void Solver::CheckStopConditionWithKnownOptPoint(int i, bool* flag, vector<Trial>& trials, int* t) {
+	if (abs(trials[*t].x - hpf[i]->GetOptimumPoint()[0]) <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
+		*flag = 0;
+	//if (abs(trials[*t].x - shf[i]->GetOptimumPoint()[0]) <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
+	//	*flag = 0;
+	trials.insert(trials.begin() + *t, NewTrial);
+}
+void Solver::CheckStopConditionCurrentZ(bool* flag, vector<Trial>& trials, int* t) {
+	if (trials[*t].z <= eps * (b - a))//—É—Å–ª–æ–≤–∏–µ –æ—Å—Ç–∞–Ω–æ–≤–∫–∏
 		*flag = 0;
 	trials.insert(trials.begin() + *t, NewTrial);
 }
@@ -235,4 +334,77 @@ void Solver::MakeBestTrial(double* minFunc, double* argmin, double* l) {
 	BestTrial.z = *minFunc;
 	BestTrial.x = *argmin;
 	BestTrial.k = *l;
+}
+
+///////////////////////////////////////////////////////
+
+void File::InputToFile_percent(vector<int>K, int n, int a) {
+	fstream file;
+	int p = 71;
+	vector <double> P(p);
+	for (int i = 1; i < n; i++) {
+		int j = i - 1;
+		while (j >= 0 && K[j] > K[j + 1])
+		{
+			swap(K[j], K[j + 1]);
+			j--;
+		}
+	}
+	int m = 0;
+	int t = 0;
+	bool f = 1;
+	for (int i = 0; i < p; i++) {
+		f = 1;
+		m = 0;
+		while (m < n && K[m] <= i * 10) {
+			P[i] = P[i] + 1;
+			m++;
+			f = 0;
+		}
+		if (f) P[i] = 0;
+	}
+	if (a == 1)	file.open("percBA.txt", fstream::in | fstream::out);
+	else if (a==2) file.open("percNewA.txt", fstream::in | fstream::out);
+	else if (a==3) file.open("percRoot.txt", fstream::in | fstream::out);
+
+	file << "K: ";
+	for (int i = 0; i < p; i++) {
+		if (i == 0) file << i * 10;
+		else file << ", " << i * 10;
+	}
+	file << "\n" << "P(%): ";
+	for (int i = 0; i < p; i++) {
+		if (i == 0) file << P[i] * 100 / n;
+		else file << ", " << P[i] * 100 / n;
+	}
+	file.close();
+}
+void File::InputToFile_x_solver (vector<Trial> trials, int n, int a) {
+	fstream file;
+	THillProblemFamily hpf;
+
+	if (a == 1)	file.open("x_solverBA.txt", fstream::in | fstream::out);
+	else if (a == 2) file.open("x_solverNewA.txt", fstream::in | fstream::out);
+	else if (a == 3) file.open("x_solverRoot.txt", fstream::in | fstream::out);
+
+	vector <int> b(201);
+	int g = 0;
+	for (int i = 0; i < 201; i++) {
+		if (i == 0) file << "x: " << g * 0.01 / 2;
+		else file << ", " << g * 0.01 / 2;
+		g++;
+	}
+	g = 0;
+	file << "\n\n";
+	for (int i = 0; i < 201; i++) {
+		if (i == 0) file << "phi: " << hpf[n]->ComputeFunction({g * 0.01 / 2}) - hpf[n]->GetOptimumValue();
+		else file << ", " << hpf[n]->ComputeFunction({g * 0.01 / 2}) - hpf[n]->GetOptimumValue();
+		g++;
+	}
+	file << "\n\n";
+	for (int i = 0; i < trials.size(); i++) {
+		if (i == 0) file << "x solver: " << trials[i].x;
+		else file << ", " << trials[i].x;
+	}
+	file.close();
 }
