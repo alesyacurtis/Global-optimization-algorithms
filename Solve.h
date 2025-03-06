@@ -14,11 +14,12 @@ struct Trial {
 
 class Solver
 {
-	double eps = 0.001;
-	double r=2;
+protected:
+	double eps = 0.0001;
+	double r = 2;
 
-	double a=0, b=1; 
-	int Kmax = 200;
+	double a = 0, b = 1;
+	int Kmax = 5000;
 
 	Trial BestTrial;
 	Trial NewTrial;
@@ -26,7 +27,10 @@ class Solver
 	THillProblemFamily hpf;
 	TShekelProblem shp;
 	TShekelProblemFamily shf;
+
 public:
+	vector<Trial> trials;
+
 	void Solve(int i);
 	//void BaseAlgorithm();
 	//void SequentialScan();
@@ -38,25 +42,51 @@ public:
 	void MakeNewTrial_SS(int i, int* K, vector<Trial>& trials, int* t); //Sequential Scan
 	void UpdateOptimum(double* minFunc, double* argmin, double* l, vector<Trial>& trials);
 	void CheckStopCondition(bool *flag, vector<Trial>& trials, int* t);
+	void CheckStopConditionWithKnownOptPoint(int i, bool* flag, vector<Trial>& trials, int* t);
+	void CheckStopConditionCurrentZ(bool* flag, vector<Trial>& trials, int* t);
 	void MakeBestTrial(double* minFunc, double* argmin, double* l);
 
+	int GetK();
+	int h;
 	Trial GetSolution();
 	int mProblemIndex;
 	
 	double obj_func(double x, int i) {
-		//return x * x - cos(18 * x);
-		//return (x - 1) * (x - 5) * x + sin(18 * x);
+		//return (x - 0.3) * (x - 0.3);
+		//return (x - 1) * x * x - sin(20 * x);
 
 		//return hp.ComputeFunction({ x });
-		return hpf[i]->ComputeFunction({ x });
+		double known_min = hpf[i]->GetOptimumValue();
+		return hpf[i]->ComputeFunction({ x }) - known_min;
 		//return shp.ComputeFunction({ x });
-		//return shf[i]->ComputeFunction({ x }); //берет десятую функцию из семейства
+		//double known_min = shf[i]->GetOptimumValue();
+		//return shf[i]->ComputeFunction({ x }) - known_min; //Р±РµСЂРµС‚ РґРµСЃСЏС‚СѓСЋ С„СѓРЅРєС†РёСЋ РёР· СЃРµРјРµР№СЃС‚РІР°
 	}
-
-	/*double eps, r;//набор с консоли
+	/*double eps, r;//РЅР°Р±РѕСЂ СЃ РєРѕРЅСЃРѕР»Рё
 	double a, b;
 	int Kmax;
 	
 	void SetParams();
 	*/
+};
+
+class SolverNew : public Solver
+{
+public:
+	void Solve(int i);
+	void FindMaxR(int* K, vector<Trial>& trials, int* t);
+	void MakeNewTrial(int i, int* K, vector<Trial>& trials, int* t);
+};
+class SolverRoot : public Solver
+{
+public:
+	void Solve(int i);
+	void FindMaxR(int* K, vector<Trial>& trials, int* t);
+	void MakeNewTrial(int i, int* K, vector<Trial>& trials, int* t);
+};
+
+class File {
+public:
+	void InputToFile_percent(vector<int>K, int n, int a);
+	void InputToFile_x_solver(vector<Trial> trials, int n, int a);
 };
